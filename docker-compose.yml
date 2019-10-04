@@ -10,10 +10,12 @@ services:
       - "9200:9200"
       - "9300:9300"
   logstash:
+    container_name: logstash
     image: docker.elastic.co/logstash/logstash:7.4.0
     volumes:
       - ./pipeline:/usr/share/logstash/pipeline
   kibana:
+    container_name: kibana
     image: docker.elastic.co/kibana/kibana:7.4.0
     ports: 
       - "5601:5601"
