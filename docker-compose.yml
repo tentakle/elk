@@ -1,18 +1,23 @@
-version: "3.7"
+version: '3.7'
 
 services: 
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.1
     restart: unless-stopped
     environment:
       discovery.type: single-node
-      ES_JAVA_OPTS: -Xmx1g -Xms1g
+      bootstrap.memory_lock: 'true'
+      ES_JAVA_OPTS: -Xmx1g -Xms1g -Des.enforce.bootstrap.checks=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9200:9200"
   logstash:
     container_name: logstash
-    image: docker.elastic.co/logstash/logstash:7.4.0
+    image: docker.elastic.co/logstash/logstash:7.4.1
     restart: unless-stopped
     environment:
       LS_JAVA_OPTS: -Xmx1g -Xms1g
@@ -20,9 +25,13 @@ services:
       - ./logstash/pipeline/kafka.conf:/usr/share/logstash/pipeline/kafka.conf:ro
     ports:
       - "5046:5046"
+    depends_on:
+      - elasticsearch
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.4.0
+    image: docker.elastic.co/kibana/kibana:7.4.1
     restart: unless-stopped
     ports: 
       - "5601:5601"
+    depends_on:
+      - logstash
